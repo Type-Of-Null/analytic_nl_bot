@@ -1,17 +1,11 @@
 from logging.config import fileConfig
 import asyncio
-
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
-
-from dotenv import load_dotenv
-
 from models import Base, Video, Snapshot
+from config import DATABASE_URL
 
-import os
-
-load_dotenv()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -23,12 +17,9 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 
-database_url = os.getenv("DATABASE_URL")
-
-
-if database_url:
+if DATABASE_URL:
     # Устанавливаем sqlalchemy.url в объекте config программно
-    config.set_main_option("sqlalchemy.url", database_url)
+    config.set_main_option("sqlalchemy.url", DATABASE_URL)
 else:
     raise ValueError("DATABASE_URL не установлена в переменных окружения.")
 
