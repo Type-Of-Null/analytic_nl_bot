@@ -6,4 +6,5 @@ wheels/
 *.egg-info
 .env
 .venv
-
+.vscode/
+data/

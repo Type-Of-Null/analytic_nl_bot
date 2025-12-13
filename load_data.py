@@ -26,17 +26,15 @@ async def load_data():
         data = json.load(f)
 
     async with async_session() as session:
-        videos_count = 0
-        snapshots_count = 0
 
         start = time.perf_counter()
+        video_ids_to_check = {video_data["id"] for video_data in data["videos"]}
+        result = await session.execute(
+            select(Video.id).where(Video.id.in_(video_ids_to_check))
+        )
+        existing_ids = set(result.scalars().all())
         for video_data in data["videos"]:
-            result = await session.execute(
-                select(Video).where(Video.id == video_data["id"])
-            )
-            existing_video = result.scalars().first()
-
-            if existing_video:
+            if video_data["id"] in existing_ids:
                 continue
 
             video = Video(
@@ -77,10 +75,8 @@ async def load_data():
                     ).replace(tzinfo=None),
                 )
                 video.snapshots.append(snapshot)
-                snapshots_count += 1
 
             session.add(video)
-            videos_count += 1
         end = time.perf_counter()
         total_time = end - start
         print(f"Время выполнения: {total_time:.2f} сек")
