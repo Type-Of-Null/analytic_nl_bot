@@ -34,7 +34,7 @@ async def handle_query(message: Message):
         # Генерируем SQL
         sql = generate_sql(user_text)
         if not is_safe_sql(sql):
-            await message.answer("⚠️ Сгенерирован небезопасный SQL-запрос")
+            await message.answer("Сгенерирован небезопасный SQL-запрос")
             return
 
         # Выполняем SQL с обработкой ошибок
@@ -42,12 +42,11 @@ async def handle_query(message: Message):
             try:
                 result = await run_sql(session, sql)
                 if result and len(result) > 0 and result[0]:
-                    await message.answer(
-                        f"Результат: {result[0][0]}", parse_mode="Markdown"
-                    )
+                    await message.answer(f"{int(result[0][0])}", parse_mode="Markdown")
                 else:
                     print("📭 Запрос выполнен, но не вернул данных")
             except Exception as db_error:
+                await message.answer("Ошибка выполнения SQL-запроса")
                 print(f"SQL ошибка: {db_error}, SQL: {sql}")
 
     except Exception as e:
@@ -62,7 +61,7 @@ async def main():
         load_model()
         print("✅ Модель загружена успешно")
     except Exception as e:
-        print(f"❌ Ошибка загрузки модели: {e}")
+        print(f"Ошибка загрузки модели: {e}")
         return
 
     try:
@@ -70,7 +69,7 @@ async def main():
         print("✅ Бот запущен и готов к работе")
         await dp.start_polling(bot)
     except Exception as e:
-        print(f"❌ Критическая ошибка бота: {e}")
+        print(f"Критическая ошибка бота: {e}")
 
 
 if __name__ == "__main__":
