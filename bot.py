@@ -34,25 +34,43 @@ async def handle_query(message: Message):
         # Генерируем SQL
         sql = generate_sql(user_text)
         if not is_safe_sql(sql):
-            await message.answer("Небезопасный SQL")
+            await message.answer("⚠️ Сгенерирован небезопасный SQL-запрос")
             return
-        else:
-            async with async_session() as session:
+
+        # Выполняем SQL с обработкой ошибок
+        async with async_session() as session:
+            try:
                 result = await run_sql(session, sql)
-                await message.answer(f"{int(result[0][0])}", parse_mode="Markdown")
+                if result and len(result) > 0 and result[0]:
+                    await message.answer(
+                        f"Результат: {result[0][0]}", parse_mode="Markdown"
+                    )
+                else:
+                    print("📭 Запрос выполнен, но не вернул данных")
+            except Exception as db_error:
+                print(f"SQL ошибка: {db_error}, SQL: {sql}")
 
     except Exception as e:
-        print(f"Ошибка: {e}")
+        print(f"Общая ошибка: {e}")
 
 
 async def main():
-
     print("🤖 Запуск бота...")
-    # Загружаем модель при старте бота
-    load_model()
 
-    # Запускаем бота
-    await dp.start_polling(bot)
+    try:
+        # Загружаем модель при старте бота
+        load_model()
+        print("✅ Модель загружена успешно")
+    except Exception as e:
+        print(f"❌ Ошибка загрузки модели: {e}")
+        return
+
+    try:
+        # Запускаем бота
+        print("✅ Бот запущен и готов к работе")
+        await dp.start_polling(bot)
+    except Exception as e:
+        print(f"❌ Критическая ошибка бота: {e}")
 
 
 if __name__ == "__main__":
