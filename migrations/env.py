@@ -3,7 +3,7 @@ import asyncio
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
-from models import Base, Video, Snapshot
+from database.models import Base, Video, Snapshot
 from config import DATABASE_URL
 
 
