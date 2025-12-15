@@ -1,35 +1,31 @@
 DB_SCHEMA = """
-    __tablename__ = "videos"
-    id = Column(String, primary_key=True)
-    video_created_at = Column(DateTime)
-    views_count = Column(Integer)
-    likes_count = Column(Integer)
-    reports_count = Column(Integer)
-    comments_count = Column(Integer)
-    creator_id = Column(String)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
+Таблица videos:
+- id (TEXT, PRIMARY KEY)
+- video_created_at (TIMESTAMP) - дата создания видео на платформе
+- views_count (INTEGER) - общее количество просмотров
+- likes_count (INTEGER) - общее количество лайков
+- reports_count (INTEGER) - количество репортов
+- comments_count (INTEGER) - количество комментариев
+- creator_id (TEXT) - ID создателя
+- created_at (TIMESTAMP) - когда запись создана в БД
+- updated_at (TIMESTAMP) - когда запись обновлена
 
-    snapshots = relationship(
-        "Snapshot", back_populates="video", cascade="all, delete-orphan"
-    )
+Таблица snapshots: - изменения за ЧАС
+- id (TEXT, PRIMARY KEY)
+- video_id (TEXT, FOREIGN KEY videos.id) - ссылка на видео
+- views_count (INTEGER) - просмотры на момент снапшота
+- likes_count (INTEGER) - лайки на момент снапшота
+- reports_count (INTEGER) - репорты на момент снапшота
+- comments_count (INTEGER) - комментарии на момент снапшота
+- delta_views_count (INTEGER) - прирост просмотров за час с предыдущего снапшота
+- delta_likes_count (INTEGER) - прирост лайков за час с предыдущего снапшота
+- delta_reports_count (INTEGER) - прирост репортов за час с предыдущего снапшота
+- delta_comments_count (INTEGER) - прирост комментариев за час с предыдущего снапшота
+- created_at (TIMESTAMP) - когда сделан снапшот
+- updated_at (TIMESTAMP) - когда обновлён снапшот
 
-
-    __tablename__ = "snapshots"
-    id = Column(String, primary_key=True)
-    video_id = Column(String, ForeignKey("videos.id"))
-    views_count = Column(Integer)
-    likes_count = Column(Integer)
-    reports_count = Column(Integer)
-    comments_count = Column(Integer)
-    delta_views_count = Column(Integer)
-    delta_likes_count = Column(Integer)
-    delta_reports_count = Column(Integer)
-    delta_comments_count = Column(Integer)
-    created_at = Column(DateTime)
-    updated_at = Column(DateTime)
-
-    video = relationship("Video", back_populates="snapshots")
+Связи:
+- Одно видео может иметь много снапшотов (videos.id = snapshots.video_id)
 """
 
 PROMPT_TEMPLATE = """[INST] <<SYS>>
@@ -52,6 +48,11 @@ PROMPT_TEMPLATE = """[INST] <<SYS>>
 
 **Важный момент:**
 - Запросы должны генерировать результат в виде чисел ТОЛЬКО (COUNT, SUM, AVG и т.д.), НЕ ВЫВОДИ текстовые данные.
+
+**ВАЖНО для JOIN:**
+- ВСЕГДА указывай префикс таблицы для столбцов: `таблица.столбец`
+- При JOIN уточняй: `snapshots.video_id`, `videos.id`
+- Избегай неоднозначных названий столбцов
 
 Полная схема базы данных для видеоплатформы:
 {DB_SCHEMA}
