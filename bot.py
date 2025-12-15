@@ -1,4 +1,3 @@
-# bot.py - ИСПРАВЛЕННАЯ версия
 import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
@@ -31,41 +30,25 @@ async def cmd_start(message: Message):
 async def handle_query(message: Message):
     user_text = message.text.strip()
 
-    # Показываем что бот думает
-    thinking_msg = await message.answer("🤔 Думаю над запросом...")
-
     try:
         # Генерируем SQL
         sql = generate_sql(user_text)
-
-        # Удаляем сообщение "Думаю..."
-        await thinking_msg.delete()
-
-        # Отправляем сгенерированный SQL
-        await message.answer(f"```sql\n{sql}\n```", parse_mode="Markdown")
-
-        # Пока пропускаем проверку безопасности и выполнение
-        # TODO: позже добавить:
-        # if not is_safe_sql(sql):
-        #     await message.answer("❌ Небезопасный SQL")
-        #     return
-        #
-        # async with async_session() as session:
-        #     rows = await run_sql(session, sql)
-        #     if rows:
-        #         text = "\n".join(str(row) for row in rows[:10])
-        #         await message.answer(f"Результат:\n{text}")
-        #     else:
-        #         await message.answer("📭 Нет данных по запросу")
+        if not is_safe_sql(sql):
+            await message.answer("Небезопасный SQL")
+            return
+        else:
+            async with async_session() as session:
+                result = await run_sql(session, sql)
+                await message.answer(f"{int(result[0][0])}", parse_mode="Markdown")
 
     except Exception as e:
-        await message.answer(f"❌ Ошибка: {str(e)}")
         print(f"Ошибка: {e}")
 
 
 async def main():
-    # Загружаем модель при старте бота
+
     print("🤖 Запуск бота...")
+    # Загружаем модель при старте бота
     load_model()
 
     # Запускаем бота

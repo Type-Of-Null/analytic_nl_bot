@@ -1,41 +1,12 @@
 import time
 from llama_cpp import Llama
+from prompt_mistral import get_prompt
 
-# 1. Модель как глобальная переменная
+# Модель как глобальная переменная
 model = None
 
-# 2. Схема БД
-DB_SCHEMA = """
-videos(
-  id TEXT PRIMARY KEY,
-  video_created_at TIMESTAMP,
-  views_count INTEGER,
-  likes_count INTEGER,
-  reports_count INTEGER,
-  comments_count INTEGER,
-  creator_id TEXT,
-  created_at TIMESTAMP,
-  updated_at TIMESTAMP
-)
 
-snapshots(
-  id TEXT PRIMARY KEY,
-  video_id TEXT REFERENCES videos(id),
-  views_count INTEGER,
-  likes_count INTEGER,
-  reports_count INTEGER,
-  comments_count INTEGER,
-  delta_views_count INTEGER,
-  delta_likes_count INTEGER,
-  delta_reports_count INTEGER,
-  delta_comments_count INTEGER,
-  created_at TIMESTAMP,
-  updated_at TIMESTAMP
-)
-"""
-
-
-# 3. Функция загрузки модели
+# Функция загрузки модели
 def load_model():
     """Загружаем модель один раз при старте бота"""
     global model
@@ -55,7 +26,7 @@ def load_model():
     return model
 
 
-# 4. Функция генерации SQL
+# Функция генерации SQL
 def generate_sql(question: str) -> str:
     """Принимает вопрос на русском, возвращает SQL"""
     print(f"\n🧠 Запрос от пользователя: {question}")
@@ -65,24 +36,16 @@ def generate_sql(question: str) -> str:
         load_model()
 
     # Собираем промпт с вопросом пользователя
-    prompt = f"""[INST] <<SYS>>
-Ты - эксперт по SQL. Отвечай только SQL кодом без объяснений.
-<</SYS>>
-
-Схема базы данных:
-{DB_SCHEMA}
-
-Запрос на русском языке: {question}
-SQL запрос: [/INST]
-```sql
-"""
-
     print("⚙️ Генерация SQL...")
     start = time.perf_counter()
 
     # Генерируем ответ
     response = model(
-        prompt, max_tokens=256, temperature=0.1, stop=["```", "</s>"], echo=False
+        get_prompt(question),
+        max_tokens=256,
+        temperature=0.1,
+        stop=["```", "</s>"],
+        echo=False,
     )
 
     end = time.perf_counter()
