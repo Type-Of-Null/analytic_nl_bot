@@ -3,8 +3,8 @@ import asyncio
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
-from database.models import Base, Video, Snapshot
-from config import DATABASE_URL
+from src.bot.core.models import Base, Video, Snapshot
+from src.bot.core.config import DATABASE_URL
 
 
 # this is the Alembic Config object, which provides

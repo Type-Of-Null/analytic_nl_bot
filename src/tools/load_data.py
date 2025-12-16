@@ -6,8 +6,8 @@ import time
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
-from database.models import Video, Snapshot
-from config import DATABASE_URL
+from src.bot.core.models import Video, Snapshot
+from src.bot.core.config import DATABASE_URL
 
 
 if not DATABASE_URL:
@@ -87,6 +87,5 @@ async def load_data():
     await engine.dispose()
 
 
-#
 if __name__ == "__main__":
     asyncio.run(load_data())

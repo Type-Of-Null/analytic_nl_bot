@@ -1,6 +1,6 @@
 import time
 from llama_cpp import Llama
-from prompt_mistral import get_prompt
+from llm.prompt_manager import get_prompt
 
 # Модель как глобальная переменная
 model = None
@@ -22,7 +22,6 @@ def load_model():
             verbose=False,
             use_mmap=True,
         )
-        print("✅ Модель загружена")
     return model
 
 

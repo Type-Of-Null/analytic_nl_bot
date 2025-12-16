@@ -3,9 +3,10 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 from aiogram.filters import Command
 
-from config import TELEGRAM_TOKEN
-from database.database import async_session, run_sql, is_safe_sql
-from mistral_7b_model import load_model, generate_sql
+from src.bot.core.config import TELEGRAM_TOKEN
+from src.database.connection import async_session
+from src.database.security import is_safe_sql, run_sql
+from llm.mistral_client import load_model, generate_sql
 
 bot = Bot(token=TELEGRAM_TOKEN)
 dp = Dispatcher()
@@ -47,7 +48,7 @@ async def handle_query(message: Message):
                     print("📭 Запрос выполнен, но не вернул данных")
             except Exception as db_error:
                 await message.answer("Ошибка выполнения SQL-запроса")
-                print(f"SQL ошибка: {db_error}, SQL: {sql}")
+                print(f"SQL ошибка: {db_error}")
 
     except Exception as e:
         print(f"Общая ошибка: {e}")
