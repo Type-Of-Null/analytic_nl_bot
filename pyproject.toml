@@ -10,6 +10,7 @@ dependencies = [
     "asyncpg>=0.31.0",
     "llama-cpp-python>=0.3.16",
     "python-dotenv>=1.2.1",
+    "requests>=2.32.5",
     "sqlalchemy>=2.0.45",
     "sqlparse>=0.5.4",
 ]

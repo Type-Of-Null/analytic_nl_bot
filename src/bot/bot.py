@@ -3,9 +3,10 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 from aiogram.filters import Command
 
-from src.bot.core.config import TELEGRAM_TOKEN
+from src.core.config import TELEGRAM_TOKEN
 from src.database.connection import async_session
 from src.database.security import is_safe_sql, run_sql
+from src.database.fix_aggregation import fix_aggregation_query
 from llm.mistral_client import load_model, generate_sql
 
 bot = Bot(token=TELEGRAM_TOKEN)
@@ -37,14 +38,16 @@ async def handle_query(message: Message):
         if not is_safe_sql(sql):
             await message.answer("Сгенерирован небезопасный SQL-запрос")
             return
+        fix_sql = fix_aggregation_query(sql)
 
         # Выполняем SQL с обработкой ошибок
         async with async_session() as session:
             try:
-                result = await run_sql(session, sql)
+                result = await run_sql(session, fix_sql)
                 if result and len(result) > 0 and result[0]:
                     await message.answer(f"{int(result[0][0])}", parse_mode="Markdown")
                 else:
+                    await message.answer("Нет данных")
                     print("📭 Запрос выполнен, но не вернул данных")
             except Exception as db_error:
                 await message.answer("Ошибка выполнения SQL-запроса")

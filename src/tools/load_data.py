@@ -6,8 +6,8 @@ import time
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
-from src.bot.core.models import Video, Snapshot
-from src.bot.core.config import DATABASE_URL
+from src.core.models import Video, Snapshot
+from src.core.config import DATABASE_URL
 
 
 if not DATABASE_URL:

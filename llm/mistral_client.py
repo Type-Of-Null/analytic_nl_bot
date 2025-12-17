@@ -14,7 +14,7 @@ def load_model():
         print("🚀 Загрузка модели Mistral-7B...")
         model = Llama(
             model_path="./models/mistral-7b-instruct-v0.1.Q4_K_M.gguf",
-            n_ctx=16384,
+            n_ctx=8192,
             n_threads=12,
             n_batch=512,
             n_gpu_layers=0,
@@ -41,10 +41,16 @@ def generate_sql(question: str) -> str:
     # Генерируем ответ
     response = model(
         get_prompt(question),
-        max_tokens=256,
-        temperature=0.1,
-        stop=["```", "</s>"],
+        max_tokens=512,
+        temperature=0.01,
+        top_p=0.95,
+        top_k=40,
+        repeat_penalty=1.1,
+        frequency_penalty=0.0,
+        presence_penalty=0.0,
+        stop=["```", "</s>", "[/INST]", ";", "\n\n"],
         echo=False,
+        seed=42,
     )
 
     end = time.perf_counter()
@@ -60,6 +66,7 @@ def generate_sql(question: str) -> str:
 
     if sql.endswith("```"):
         sql = sql[:-3].strip()
-
+    print("*" * 50)
     print(f"📝 Сгенерированный SQL:\n{sql}")
+    print("*" * 50)
     return sql
