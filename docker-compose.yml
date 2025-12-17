@@ -12,44 +12,27 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    ports:
-      - "5432:5432"
-
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
-    volumes:
-      - ollama_data:/root/.ollama
-    ports:
-      - "11434:11434"
-    environment:
-      - OLLAMA_KEEP_ALIVE=24h
-    command: serve
-    restart: unless-stopped
-    deploy:
-      resources:
-        reservations:
-          memory: 8G
 
   app:
+    image: analytic-nl-bot
     build: .
     depends_on:
       db:
         condition: service_healthy
-      ollama:
-        condition: service_started
     environment:
       DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-analytic}"
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
-      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
       LLM_MODEL: ${LLM_MODEL:-llama3}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./data:/app/data:rw
     restart: unless-stopped
-    command: ["python", "bot.py"]
+    command: ["python", "-m", "src.main"]
 
   loader:
-    build: .
+    image: analytic-nl-bot
     depends_on:
       db:
         condition: service_healthy
@@ -57,9 +40,8 @@ services:
       DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-analytic}"
     volumes:
       - ./data:/app/data:ro
-    command: ["python", "load_data.py"]
-    restart: 'no'
+    command: ["python", "-m", "src.tools.load_data"]
+    restart: "no"
 
 volumes:
   postgres_data:
-  ollama_data:

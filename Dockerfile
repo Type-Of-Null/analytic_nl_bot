@@ -1,47 +1,51 @@
-# Используем Python образ с uv предустановленным
-FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+############################
+# Stage 1: dependencies
+############################
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 
-# Устанавливаем не-root пользователя
-RUN groupadd --system --gid 999 nonroot \
-    && useradd --system --gid 999 --uid 999 --create-home nonroot
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Включаем компиляцию байткода
-ENV UV_COMPILE_BYTECODE=1
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_NO_DEV=1 \
+    UV_TOOL_BIN_DIR=/usr/local/bin
 
-# Копируем из кэша вместо линковки, так как это mounted volume
-ENV UV_LINK_MODE=copy
-
-# Исключаем зависимости для разработки
-ENV UV_NO_DEV=1
-
-# Убеждаемся, что установленные инструменты могут быть выполнены
-ENV UV_TOOL_BIN_DIR=/usr/local/bin
-
-# Копируем файлы зависимостей
 COPY pyproject.toml uv.lock ./
 
-# Устанавливаем зависимости с кэшированием
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-install-project
 
-# Копируем весь проект
 COPY . .
 
-# Устанавливаем проект
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked
 
-# Добавляем venv в PATH
-ENV PATH="/app/.venv/bin:$PATH"
 
-# Сбрасываем entrypoint
-ENTRYPOINT []
+############################
+# Stage 2: runtime
+############################
+FROM python:3.12-slim-bookworm
 
-# Используем не-root пользователя
+WORKDIR /app
+
+# создаём non-root заранее
+RUN groupadd --system nonroot \
+    && useradd --system --create-home --gid nonroot nonroot
+
+# копируем только нужное
+COPY --from=builder /app /app
+
+# минимальные переменные
+ENV PATH="/app/.venv/bin:$PATH" \
+    VIRTUAL_ENV="/app/.venv" \
+    PYTHONPATH="/app"
+
 USER nonroot
 
-# Запускаем приложение по умолчанию
-CMD ["uv", "run", "python", "-m", "src.main"]
+CMD ["python", "-m", "src.main"]

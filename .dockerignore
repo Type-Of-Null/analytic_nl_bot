@@ -1,7 +1,12 @@
-.venv
+.git
+.gitignore
 __pycache__
 *.pyc
-.dockerignore
-.git
 .env
-data/videos.json
+.venv
+node_modules
+dist
+build
+.cache
+.hf_cache
+models

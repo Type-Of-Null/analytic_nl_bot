@@ -7,6 +7,6 @@ wheels/
 .env
 .venv
 .vscode/
-data/
+data/videos.json
 models/
 logs/
