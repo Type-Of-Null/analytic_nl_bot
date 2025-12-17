@@ -13,19 +13,40 @@ services:
       timeout: 5s
       retries: 5
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+    command: serve
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          memory: 8G
+    healthcheck:
+      test: ["CMD", "ollama", "serve"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   app:
     image: analytic-nl-bot
     build: .
     depends_on:
       db:
         condition: service_healthy
+      ollama:
+        condition: service_healthy
     environment:
       DATABASE_URL: "postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-analytic}"
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}
-      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      OLLAMA_BASE_URL: http://ollama:11434
       LLM_MODEL: ${LLM_MODEL:-llama3}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     volumes:
       - ./data:/app/data:rw
     restart: unless-stopped
@@ -45,3 +66,4 @@ services:
 
 volumes:
   postgres_data:
+  ollama_data:
