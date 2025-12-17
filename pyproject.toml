@@ -8,7 +8,6 @@ dependencies = [
     "aiogram>=3.23.0",
     "alembic>=1.17.2",
     "asyncpg>=0.31.0",
-    "llama-cpp-python>=0.3.16",
     "python-dotenv>=1.2.1",
     "requests>=2.32.5",
     "sqlalchemy>=2.0.45",

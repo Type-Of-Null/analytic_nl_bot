@@ -1,37 +1,33 @@
-## Docker Compose
+# Analytic NL Bot
 
-Быстрый запуск с помощью Docker Compose (создаёт Postgres БД и запускает бота):
+Telegram бот для аналитических запросов на естественном языке.
 
-1. Скопируйте `.env.example` в `.env` и задайте `TELEGRAM_TOKEN`:
+## Быстрый старт
+
+1. Скопируйте и настройте переменные окружения:
 
 ```bash
 cp .env.example .env
-# отредактируйте .env и укажите TELEGRAM_TOKEN
+# Отредактируйте .env, укажите TELEGRAM_TOKEN
+
 ```
 
-2. Соберите и запустите сервисы:
+# Запустите проект:
 
-```bash
 docker compose up --build
-```
 
-Примечания:
+# Запуск бота
 
-- Сервис `app` дождётся доступности БД, выполнит `alembic upgrade head`, а затем запустит бота.
-- Если вы измените модели, создайте файл миграции командой `alembic revision --autogenerate -m "описание"`; миграции будут автоматически применены при старте контейнера.
+docker compose up
 
-Заполнение БД начальными данными:
+# Загрузка тестовых данных
 
-Чтобы заполнить БД данными из `data/videos.json` (предварительно скачав его) выполните одноразовый сервис `loader`:
-
-```bash
 docker compose run --rm loader
-```
 
-Это запустит `python load_data.py` после применения миграций.
+# Подключение к БД
 
-Запуск бота:
+docker compose exec db psql -U user analytic_bot
 
-```bash
-python bot.py
-```
+# Логи бота
+
+docker compose logs app -f
