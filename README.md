@@ -4,32 +4,71 @@ Telegram бот для аналитических запросов на есте
 
 ## Подготовка к запуску:
 
-1. Скопируйте и настройте переменные окружения:
+### 1. Установите Ollama на ваш компьютер:
+
+#### Linux/macOS
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+#### Windows
+
+Скачайте установщик с https://ollama.com/download
+
+#### Запустить сервис Ollama
+
+```bash
+ollama serve
+```
+
+#### В другом терминале скачать модель
+
+```bash
+ollama pull llama3.2
+```
+
+### 2. Скопируйте и настройте переменные окружения:
 
 ```bash
 cp .env.example .env
 # Отредактируйте .env, укажите TELEGRAM_TOKEN
-
 ```
 
-2. Файл videos.json скопировать в папку /data
+### 3. Файл videos.json скопировать в папку /data
 
-# Запустите проект:
+#### Запустите проект:
 
+```bash
 docker compose up --build
+```
 
-# Запуск бота
+#### Запуск бота
 
+```bash
 docker compose up
+```
 
-# Загрузка тестовых данных
+#### Загрузка тестовых данных
 
+```bash
 docker compose run --rm loader
+```
 
-# Подключение к БД
+#### Подключение к БД
 
+```bash
 docker compose exec db psql -U user analytic_bot
+```
 
-# Логи бота
+#### Логи бота
 
+```bash
 docker compose logs app -f
+```
+
+#### Остановка
+
+```bash
+docker compose down
+```
